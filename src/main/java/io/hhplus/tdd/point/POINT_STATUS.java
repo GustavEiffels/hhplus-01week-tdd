@@ -1,9 +1,13 @@
-package io.hhplus.tdd.unit;
+package io.hhplus.tdd.point;
 
 public enum POINT_STATUS {
     SUCCESS,NOT_EXIST,RESULT_BELOW_ZERO,
     INVALID_NUMBER_FORMAT,
     INVALID_USERID,
     INVALID_CHARGE_AMOUNT,
-    OUT_OF_CHARGE
+
+    CHARGE_POINT_OVERFLOW, INVALID_USE_AMOUNT,
+
+    USED_POINT_UNDERFLOW;
+
 }

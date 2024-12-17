@@ -1,7 +1,7 @@
-package io.hhplus.tdd.unit;
+package io.hhplus.tdd.point;
 
 public class UserPointException extends RuntimeException {
-    private final POINT_STATUS status;
+    public final POINT_STATUS status;
 
     public UserPointException(POINT_STATUS status, String message){
         super(message);
@@ -12,7 +12,4 @@ public class UserPointException extends RuntimeException {
         this.status = status;
     }
 
-    public POINT_STATUS getStatus(){
-        return this.status;
-    }
 }

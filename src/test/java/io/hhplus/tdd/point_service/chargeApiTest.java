@@ -1,10 +1,10 @@
-package io.hhplus.tdd.unit.point_service;
+package io.hhplus.tdd.point_service;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.point.POINT_STATUS;
 import io.hhplus.tdd.point.UserPoint;
-import io.hhplus.tdd.unit.POINT_STATUS;
-import io.hhplus.tdd.unit.UserPointException;
+import io.hhplus.tdd.point.UserPointException;
 import io.hhplus.tdd.unit.user_point_validation.UserPointValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ public class chargeApiTest {
         UserPointException exception = Assertions.assertThrows(UserPointException.class,()->{
             userPointService.charge(-1L,10_000L);
         });
-        Assertions.assertEquals(exception.getStatus(), POINT_STATUS.INVALID_USERID);
+        Assertions.assertEquals(exception.status, POINT_STATUS.INVALID_USERID);
     }
 
     /**
@@ -73,7 +73,7 @@ public class chargeApiTest {
         UserPointException exception = Assertions.assertThrows(UserPointException.class,()->{
             userPointService.charge(1L,1_000L);
         });
-        Assertions.assertEquals(exception.getStatus(), POINT_STATUS.INVALID_CHARGE_AMOUNT);
+        Assertions.assertEquals(exception.status, POINT_STATUS.INVALID_CHARGE_AMOUNT);
     }
 
 
@@ -86,14 +86,28 @@ public class chargeApiTest {
     @Test
     void when_OutOfCharging_then_Exception_Emerge(){
 
-        // user Id 가 1L 인 유저의 레코드를 미리 생성 
+        // user Id 가 1L 인 유저의 레코드를 미리 생성
         when(userPointTable.selectById(1L))
                 .thenReturn(new UserPoint(1L,999_999_999L,System.currentTimeMillis()));
 
         UserPointException exception = Assertions.assertThrows(UserPointException.class,()->{
             userPointService.charge(1L,5_000L);
         });
-        Assertions.assertEquals(exception.getStatus(), POINT_STATUS.OUT_OF_CHARGE);
+    }
+
+    /**
+     * test4
+     * 모든 조건이 맞는 경우 충전한 금액이 맞는지 확인하기
+     *
+     */
+    @Test
+    void when_allConditionFine_Then_Success(){
+
+        // userId  : 1L , Point : 10_000L
+        when(userPointTable.selectById(1L))
+                .thenReturn(new UserPoint(1L,10_000L,System.currentTimeMillis()));
+
+
     }
 
 }

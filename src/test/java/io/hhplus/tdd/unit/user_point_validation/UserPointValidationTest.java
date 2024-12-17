@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
  */
 public class UserPointValidationTest {
 
-
     private UserPointValidation pointValidation;
 
     @BeforeEach
@@ -40,13 +39,13 @@ public class UserPointValidationTest {
     void 충전_가능한_포인트인지_확인(){
 
         // ** point < 5_000 : false
-        Assertions.assertFalse(pointValidation.isValidChargePoint(4_000L));
+        Assertions.assertFalse(pointValidation.isValidRechargeAmount(4_000L));
 
         // ** point > 2_000_000 : false
-        Assertions.assertFalse(pointValidation.isValidChargePoint(2_000_001L));
+        Assertions.assertFalse(pointValidation.isValidRechargeAmount(2_000_001L));
 
         // ** 4_999L < point < 2_000_001 : false
-        Assertions.assertFalse(pointValidation.isValidChargePoint(2_000_001L));
+        Assertions.assertFalse(pointValidation.isValidRechargeAmount(2_000_001L));
     }
 
 
@@ -69,10 +68,10 @@ public class UserPointValidationTest {
         Assertions.assertFalse(pointValidation.isValidUsePoint(4_000L));
 
         // ** point > 2_000_000 : false
-        Assertions.assertFalse(pointValidation.isValidChargePoint(2_000_001L));
+        Assertions.assertFalse(pointValidation.isValidUsePoint(2_000_001L));
 
         // ** 4_999L < point < 2_000_001 : false
-        Assertions.assertFalse(pointValidation.isValidChargePoint(2_000_001L));
+        Assertions.assertFalse(pointValidation.isValidUsePoint(2_000_001L));
     }
 
 
@@ -97,8 +96,6 @@ public class UserPointValidationTest {
     }
 
 
-
-
 // FIELD : point
     /**
      * @Method : isPointAvailable(long currentPoint, long pointToUse )
@@ -112,13 +109,13 @@ public class UserPointValidationTest {
     void 현재남은포인트_보다_사용할_포인트가_많은_경우_예외(){
 
         // 남아 있는 포인트 < 사용 할 포인트 : false
-        Assertions.assertFalse(pointValidation.isPointAvailable(3000L,10000L));
+        Assertions.assertFalse(pointValidation.canUsePoints(3000L,10000L));
 
         // 남아 있는 포인트 == 사용 할 포인트 : true
-        Assertions.assertTrue(pointValidation.isPointAvailable(10000L,10000L));
+        Assertions.assertTrue(pointValidation.canUsePoints(10000L,10000L));
 
         // 남아 있는 포인트 > 사용 할 포인트 : true
-        Assertions.assertTrue(pointValidation.isPointAvailable(20000L,10000L));
+        Assertions.assertTrue(pointValidation.canUsePoints(20000L,10000L));
     }
 
 
@@ -135,19 +132,19 @@ public class UserPointValidationTest {
     void 충전_가능한_포인트_테스트(){
         // ** 1. 남은 포인트 + 충전 포인트 <= 최대 포인트 -> true
         Assertions.assertTrue(
-                pointValidation.isChargeAvailable(
+                pointValidation.canRecharge(
                         900_000_000L,
                         100_000_000L));
 
         // ** 2. 남은 포인트 > 최대 포인트             -> false
         Assertions.assertFalse(
-                pointValidation.isChargeAvailable(
+                pointValidation.canRecharge(
                         1_000_000_001L,
                         1L));
 
         // ** 3. 남은 포인트 + 충전 포인트 > 최대 포인트  -> false
         Assertions.assertFalse(
-                pointValidation.isChargeAvailable(
+                pointValidation.canRecharge(
                         900_000_000L,
                         120_000_000L));
     }
