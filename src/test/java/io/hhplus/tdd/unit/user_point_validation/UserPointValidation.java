@@ -7,8 +7,10 @@ package io.hhplus.tdd.unit.user_point_validation;
 public class UserPointValidation {
 
     private final long maxPoint       = 1_000_000_000L;
+// use point
     private final long maxUsePoint    = 1_000_000L;
     private final long minUsePoint    = 10_000L;
+// charge point
     private final long maxChargePoint = 2_000_000L;
     private final long minChargePoint = 5_000L;
 

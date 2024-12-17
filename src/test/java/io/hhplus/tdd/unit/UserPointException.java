@@ -11,4 +11,8 @@ public class UserPointException extends RuntimeException {
     public UserPointException(POINT_STATUS status){
         this.status = status;
     }
+
+    public POINT_STATUS getStatus(){
+        return this.status;
+    }
 }

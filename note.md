@@ -63,3 +63,15 @@
 - userId 가 음수로 될 때 에러 
 - userPoint 연산 결과가 음수일 경우 에러 
 - userPoint history 가 존재하지 않을 경우 에러 
+
+
+## 포인트 충전 
+```java
+    @PatchMapping("{id}/charge")
+    public UserPoint charge(
+            @PathVariable long id,
+            @RequestBody long amount
+    ) {
+        return new UserPoint(0, 0, 0);
+    }
+```
