@@ -1,4 +1,4 @@
-package io.hhplus.tdd.Integration;
+package io.hhplus.tdd.Integration.currency;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
@@ -13,12 +13,12 @@ import java.util.List;
  * 동시성 제어를 하지 않고
  * 오직 기능만 구현
  */
-public class PointServiceFO {
+public class PointServiceSync {
     private final UserPointTable    userPointTable;
     private final PointHistoryTable pointHistoryTable;
     private final ServiceValidation serviceValidation;
 
-    public PointServiceFO(
+    public PointServiceSync(
             UserPointTable    userPointTable,
             PointHistoryTable pointHistoryTable,
             ServiceValidation serviceValidation ){
@@ -60,7 +60,7 @@ public class PointServiceFO {
      * @param pointToCharge
      * @return
      */
-    public UserPoint pointCharge(long userid, long pointToCharge){
+    public synchronized UserPoint pointCharge(long userid, long pointToCharge){
         UserPoint userPoint         = findUserPointByUserId(userid);
         long      updatedPoints     = userPoint.charge(pointToCharge);
         return upsertPoint(userid,pointToCharge,updatedPoints,TransactionType.CHARGE);
@@ -75,7 +75,7 @@ public class PointServiceFO {
      * @param pointToUse
      * @return
      */
-    public UserPoint pointUse(long userid, long pointToUse){
+    public synchronized UserPoint pointUse(long userid, long pointToUse){
         UserPoint userPoint       = findUserPointByUserId(userid);
         long      updatedPoints   = userPoint.use(pointToUse);
         return upsertPoint(userid,pointToUse,updatedPoints,TransactionType.USE);

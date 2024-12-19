@@ -1,29 +1,22 @@
-package io.hhplus.tdd.Integration;
+package io.hhplus.tdd.Integration.currency;
 
-import io.hhplus.tdd.database.PointHistoryTable;
-import io.hhplus.tdd.database.UserPointTable;
-import io.hhplus.tdd.unit.service_validation.ServiceValidation;
+import io.hhplus.tdd.service.PointService;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class PointServiceFOTest {
+@SpringBootTest
+public class PointServiceConCurrencyTest {
 
-
-    PointServiceFO pointService;
-    @BeforeEach
-    void setUp(){
-        UserPointTable userPointTable = new UserPointTable();
-        PointHistoryTable pointHistoryTable = new PointHistoryTable();
-        ServiceValidation serviceValidation = new ServiceValidation();
-        pointService = new PointServiceFO(userPointTable,pointHistoryTable,serviceValidation);
-    }
+    @Autowired
+    private PointService pointService;
 
     private static final int THREAD_NUM = 100;
 
@@ -45,7 +38,7 @@ public class PointServiceFOTest {
 
         for(int i = 0; i<THREAD_NUM; i++){
             executor.submit(()->{
-                pointService.pointCharge(1L,10_000L);
+               pointService.pointCharge(1L,10_000L);
             });
         }
 
@@ -55,8 +48,38 @@ public class PointServiceFOTest {
         long end_time = System.currentTimeMillis();
         timeRecorder(start_time,end_time);
 
-        Assertions.assertNotEquals(10_000*THREAD_NUM,pointService.findUserPointByUserId(1L).point());
-        System.out.println("실제 저장된 포인트 : "+pointService.findUserPointByUserId(1L).point());
+        Assertions.assertEquals(10_000*THREAD_NUM,pointService.findUserPointByUserId(1L).point());
+    }
+
+    /**
+     * 예외 발생하는 경우
+     * 동시에 10_000 포인트 충전
+     * 특정 숫자 횟수에 예외 발생
+     */
+    @DisplayName("한 사람이 여러번 요청 중 하나가 예외일 때")
+    @Test
+    void sameUser_pointCharge_ExceptionHandling_Once_Exception() throws InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUM);
+
+        long start_time = System.currentTimeMillis();
+        AtomicInteger exceptionInteger = new AtomicInteger(0);
+
+        for (int i = 0; i < THREAD_NUM; i++) {
+            executor.submit(() -> {
+                final long chargePoint = (exceptionInteger.getAndIncrement()  == 55) ? 2_000_000L : 10_000L;
+                pointService.pointCharge(1L, chargePoint);
+            });
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.MINUTES);
+
+
+        long end_time = System.currentTimeMillis();
+        timeRecorder(start_time, end_time);
+
+        long expectedPoint = 10_000 * (THREAD_NUM - 1);
+        Assertions.assertEquals(expectedPoint, pointService.findUserPointByUserId(1L).point());
     }
 
     @DisplayName("쓰래드 수 만큼의 서로 다른 유저들이 각자 충전 할 때")
@@ -97,4 +120,3 @@ public class PointServiceFOTest {
         Assertions.assertEquals(10_000*THREAD_NUM,totalPoint);
     }
 }
-

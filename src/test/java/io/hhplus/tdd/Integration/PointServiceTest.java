@@ -199,6 +199,7 @@ public class PointServiceTest {
         Assertions.assertEquals(100_000L,pointService.findUserPointByUserId(1L).point());
     }
 
+
     /**
      * findAllPointHistoryByUserId
      * 모든_거래내역이_있는지
