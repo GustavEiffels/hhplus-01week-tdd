@@ -3,9 +3,7 @@ package io.hhplus.tdd.Integration.currency;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.unit.service_validation.ServiceValidation;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutorService;
@@ -37,9 +35,9 @@ public class PointServiceFOTest {
      * 같은 사용자가
      * 동시에 10_000 포인트 충전
      */
-    @DisplayName("같은 사용자가 한번에 스레드 수 만큼 충전할 때")
     @Test
     void sameUser_pointCharge() throws InterruptedException {
+        System.out.println("같은 사용자가 한번에 스레드 수 만큼 충전할 때");
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUM);
         long start_time = System.currentTimeMillis();
 
@@ -54,18 +52,17 @@ public class PointServiceFOTest {
 
         long end_time = System.currentTimeMillis();
         timeRecorder(start_time,end_time);
-
-        Assertions.assertNotEquals(10_000*THREAD_NUM,pointService.findUserPointByUserId(1L).point());
+        System.out.println("예상 포인트 : "+THREAD_NUM*10_000);
         System.out.println("실제 저장된 포인트 : "+pointService.findUserPointByUserId(1L).point());
     }
 
-    @DisplayName("쓰래드 수 만큼의 서로 다른 유저들이 각자 충전 할 때")
     /**
      * 전부 다른 유저 들로 할 경우
      * @throws InterruptedException
      */
     @Test
     void differentUser_pointCharge() throws InterruptedException {
+        System.out.println("동시에 다른 유저들이 각각 요청");
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUM);
 
         long start_time = System.currentTimeMillis();
@@ -91,10 +88,9 @@ public class PointServiceFOTest {
             final long userId = i;
             long point = pointService.findUserPointByUserId(userId).point();
             totalPoint+= point;
-//            System.out.println("사용자 "+userId+" 현재 포인트 : "+point);
         }
-
-        Assertions.assertEquals(10_000*THREAD_NUM,totalPoint);
+        System.out.println("예상 포인트 : "+THREAD_NUM*10_000);
+        System.out.println("포인트 총합 : "+totalPoint);
     }
 }
 

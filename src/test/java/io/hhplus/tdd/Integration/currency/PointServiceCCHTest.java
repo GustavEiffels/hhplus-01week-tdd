@@ -3,9 +3,7 @@ package io.hhplus.tdd.Integration.currency;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.unit.service_validation.ServiceValidation;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutorService;
@@ -13,16 +11,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class PointServiceSyncTest {
+public class PointServiceCCHTest {
 
 
-    PointServiceSync pointService;
+    PointServiceCCH pointService;
     @BeforeEach
     void setUp(){
         UserPointTable userPointTable = new UserPointTable();
         PointHistoryTable pointHistoryTable = new PointHistoryTable();
         ServiceValidation serviceValidation = new ServiceValidation();
-        pointService = new PointServiceSync(userPointTable,pointHistoryTable,serviceValidation);
+        pointService = new PointServiceCCH(userPointTable,pointHistoryTable,serviceValidation);
     }
 
     private static final int THREAD_NUM = 100;
