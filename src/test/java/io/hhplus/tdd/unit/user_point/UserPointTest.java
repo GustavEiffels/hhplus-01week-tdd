@@ -8,6 +8,13 @@ import org.junit.jupiter.api.Test;
 
 public class UserPointTest {
 
+    /**
+     * recharge
+     * 충전을 위한 테스트 함수
+     * @param leftPoint
+     * @param pointToCharge
+     * @param pointStatus
+     */
     private void getChargeTest(long leftPoint,long pointToCharge,POINT_STATUS pointStatus){
         UserPointException exception = Assertions.assertThrows(UserPointException.class,()->{
             new UserPoint(
@@ -18,6 +25,13 @@ public class UserPointTest {
         Assertions.assertEquals(pointStatus, exception.status);
     }
 
+    /**
+     * use
+     * 포인트 사용을 위한 테스트 함수
+     * @param leftPoint
+     * @param pointToUse
+     * @param pointStatus
+     */
     private void getUsePointTest(long leftPoint,long pointToUse,POINT_STATUS pointStatus){
         UserPointException exception = Assertions.assertThrows(UserPointException.class,()->{
             new UserPoint(
