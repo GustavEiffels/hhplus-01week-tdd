@@ -1,27 +1,24 @@
-package io.hhplus.tdd.service;
+package io.hhplus.tdd.Integration;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
-import org.springframework.stereotype.Service;
+import io.hhplus.tdd.unit.service_validation.ServiceValidation;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
-@Service
-public class PointService {
+/**
+ * 동시성 제어를 하지 않고
+ * 오직 기능만 구현
+ */
+public class PointServiceSync {
     private final UserPointTable    userPointTable;
     private final PointHistoryTable pointHistoryTable;
     private final ServiceValidation serviceValidation;
 
-    // 사용자별 ReentrantLock 관리
-    private final ConcurrentHashMap<Long, ReentrantLock> userLocks = new ConcurrentHashMap<>();
-
-
-    public PointService(
+    public PointServiceSync(
             UserPointTable    userPointTable,
             PointHistoryTable pointHistoryTable,
             ServiceValidation serviceValidation ){
@@ -54,6 +51,36 @@ public class PointService {
         return pointHistoryTable.selectAllByUserId(userId);
     }
 
+    /** pointCharge
+     * userid 와 pointToCharge 로 point 충전
+     * - userId 는 정책에 맞는지
+     * - pointToCharge 는 정책에 맞는지 - 도메인에 적용
+     * - 이후 연산
+     * @param userid
+     * @param pointToCharge
+     * @return
+     */
+    public synchronized UserPoint pointCharge(long userid, long pointToCharge){
+        UserPoint userPoint         = findUserPointByUserId(userid);
+        long      updatedPoints     = userPoint.charge(pointToCharge);
+        return upsertPoint(userid,pointToCharge,updatedPoints,TransactionType.CHARGE);
+    }
+
+    /** pointUse
+     * userid 와 pointToUse 로 point 충전
+     * - userId 는 정책에 맞는지
+     * - pointToUse 는 정책에 맞는지 - 도메인에 적용
+     * - 이후 연산
+     * @param userid
+     * @param pointToUse
+     * @return
+     */
+    public synchronized UserPoint pointUse(long userid, long pointToUse){
+        UserPoint userPoint       = findUserPointByUserId(userid);
+        long      updatedPoints   = userPoint.use(pointToUse);
+        return upsertPoint(userid,pointToUse,updatedPoints,TransactionType.USE);
+    }
+
     /** upsertPoint
      * 포인트 사용과 포인트 충전 연산의
      * 공통 부분
@@ -68,55 +95,4 @@ public class PointService {
         pointHistoryTable.insert(userid,changePoint, type,System.currentTimeMillis());
         return  updateUserPoint;
     }
-
-    /** pointCharge
-     * userid 와 pointToCharge 로 point 충전
-     * - userId 는 정책에 맞는지
-     * - pointToCharge 는 정책에 맞는지 - 도메인에 적용
-     * - 이후 연산
-     * @param userid
-     * @param pointToCharge
-     * @return
-     */
-    public UserPoint pointCharge(long userid, long pointToCharge){
-        return executeWithLock(userid,()->{
-            UserPoint userPoint         = findUserPointByUserId(userid);
-            long      updatedPoints     = userPoint.charge(pointToCharge);
-            return upsertPoint(userid,pointToCharge,updatedPoints,TransactionType.CHARGE);
-        });
-    }
-
-    /** pointUse
-     * userid 와 pointToUse 로 point 충전
-     * - userId 는 정책에 맞는지
-     * - pointToUse 는 정책에 맞는지 - 도메인에 적용
-     * - 이후 연산
-     * @param userid
-     * @param pointToUse
-     * @return
-     */
-    public UserPoint pointUse(long userid, long pointToUse){
-        return executeWithLock(userid,()->{
-            UserPoint userPoint       = findUserPointByUserId(userid);
-            long      updatedPoints   = userPoint.use(pointToUse);
-            return upsertPoint(userid,pointToUse,updatedPoints,TransactionType.USE);
-        });
-    }
-
-
-    public  <T> T executeWithLock(long userId, Action<T> action) {
-        ReentrantLock lock = userLocks.computeIfAbsent(userId, id -> new ReentrantLock());
-        lock.lock();
-        try {
-            return action.execute();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @FunctionalInterface
-    public interface Action<T> {
-        T execute();
-    }
-
 }

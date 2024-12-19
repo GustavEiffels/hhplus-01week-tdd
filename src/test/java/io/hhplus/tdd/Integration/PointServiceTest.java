@@ -1,9 +1,11 @@
 package io.hhplus.tdd.Integration;
 
 
+import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.*;
 import io.hhplus.tdd.service.PointService;
+import io.hhplus.tdd.service.ServiceValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,6 @@ public class PointServiceTest {
     @Autowired
     PointService pointService;
 
-    @Autowired
-    UserPointTable userPointTable;
 
 // findUserPointByUserId
     /**
@@ -84,7 +84,8 @@ public class PointServiceTest {
     void pointCharge_SUCCESS(){
         pointService.pointCharge(1L,100_000L);
         List<PointHistory> pointHistoryList = pointService.findAllPointHistoryByUserId(1L);
-        Assertions.assertEquals(pointService.findUserPointByUserId(1L).point(),100_000L);
+        UserPoint userPoint = pointService.findUserPointByUserId(1L);
+        Assertions.assertEquals(userPoint.point(),100_000L);
         Assertions.assertEquals(pointHistoryList.size(),1);
         Assertions.assertEquals(pointHistoryList.get(0).type(), TransactionType.CHARGE);
         Assertions.assertEquals(pointHistoryList.get(0).amount(), 100_000L);

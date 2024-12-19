@@ -1,8 +1,8 @@
 package io.hhplus.tdd.unit.user_point_validation;
 
 /**
-    검증 컴포넌트를 만들어서 하는 것이 단위 테스트 시 이점이 있다고 하여
-    새로 생성 후 테스트 수행
+    사용하지 않은 로직
+ -> 해당 포인트 검증 로직을 domain 으로 이동
  */
 public class UserPointValidation {
 
